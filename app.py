@@ -1,8 +1,9 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 import sqlite3
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = app = Flask(__name__, template_folder='templates', static_folder='static')
+
 CORS(app)
 
 # DB connect function
@@ -87,5 +88,19 @@ def get_customer(user_id):
         return jsonify({"error": str(e)}), 500
 
 # ✅ Run the app
+@app.route("/")
+def home():
+    return render_template("index.html")
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+import os
+import subprocess
+
+# Get absolute path to ecommerce.db
+db_path = os.path.abspath("ecommerce.db")
+print("Database Path:", db_path)
+
+# Open File Explorer at the DB location
+subprocess.run(f'explorer /select,"{db_path}"')

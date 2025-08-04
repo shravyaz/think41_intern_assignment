@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Viewer</title>
+    <script>
+        async function loadCustomers() {
+            const res = await fetch("http://127.0.0.1:5000/customers");
+            const data = await res.json();
+            const list = document.getElementById("customerList");
+            list.innerHTML = "";
+
+            data.forEach(customer => {
+                const li = document.createElement("li");
+                li.innerText = customer.first_name + " " + customer.last_name;
+                li.onclick = () => loadDetails(customer.id);
+                list.appendChild(li);
+            });
+        }
+
+        async function loadDetails(userId) {
+            const res = await fetch(`http://127.0.0.1:5000/customers/${userId}`);
+            const customer = await res.json();
+
+            const details = document.getElementById("details");
+            details.innerHTML = `
+                <h3>${customer.first_name} ${customer.last_name}</h3>
+                <p>Email: ${customer.email}</p>
+                <p>Orders: ${customer.order_count}</p>
+            `;
+        }
+
+        window.onload = loadCustomers;
+    </script>
+</head>
+<body>
+    <h1>Customers</h1>
+    <ul id="customerList"></ul>
+
+    <div id="details"></div>
+</body>
+</html>
+>
