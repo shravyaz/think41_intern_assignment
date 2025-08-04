@@ -1,42 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Customer Viewer</title>
-    <script>
-        async function loadCustomers() {
-            const res = await fetch("http://127.0.0.1:5000/customers");
-            const data = await res.json();
-            const list = document.getElementById("customerList");
-            list.innerHTML = "";
-
-            data.forEach(customer => {
-                const li = document.createElement("li");
-                li.innerText = customer.first_name + " " + customer.last_name;
-                li.onclick = () => loadDetails(customer.id);
-                list.appendChild(li);
-            });
-        }
-
-        async function loadDetails(userId) {
-            const res = await fetch(`http://127.0.0.1:5000/customers/${userId}`);
-            const customer = await res.json();
-
-            const details = document.getElementById("details");
-            details.innerHTML = `
-                <h3>${customer.first_name} ${customer.last_name}</h3>
-                <p>Email: ${customer.email}</p>
-                <p>Orders: ${customer.order_count}</p>
-            `;
-        }
-
-        window.onload = loadCustomers;
-    </script>
+  <meta charset="UTF-8">
+  <title>Customer List</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    .loading {
+      color: gray;
+      font-style: italic;
+    }
+    .error {
+      color: red;
+    }
+  </style>
 </head>
 <body>
-    <h1>Customers</h1>
-    <ul id="customerList"></ul>
 
-    <div id="details"></div>
-</body>
-</html>
->
+<h1>Customer List</h1>
+<input type="text" id="searchInput" placeholder="Search by name or email">
+
+<div id="status" class="loading">Loading customers...</div>
+<table id="customerTable" style="display:none;">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Order Count</th>
+    </tr>
+  </thead>
+  <tbody id="customerBody">
+    <!-- Dynamic content -->
+  </tbody>
+</table>
+
+<script>
+  let allCustomers = [];
+
+  async function fetchCustomers() {
+    const status = document.getElementById("status");
+    try {
+      const res = await fetch("/customers");
+      const data = await res.json();
+      allCustomers = data;
+      status.style.display = "none";
+      document.getElementById("customerTable").style.display = "table";
+      displayCustomers(data);
+    } catch (err) {
+      status.innerText = "Error loading customer data.";
+      status.classList.add("error");
+    }
+  }
+
+  function displayCustomers(customers) {
+    const tbody = document.getElementById("customerBody");
+    tbody.innerHTML = "";
+    customers.forEach(cust => {
+      const row = `<tr>
+        <td>${cust.name}</td>
+        <td>${cust.email}</td>
+        <td>${cust.order_count}</td>
+      </tr>`;
